@@ -114,3 +114,9 @@
   background-color: rgba(46, 204, 113, 0.1);
   transition: background-color 1s ease;
 }
+
+.sc-tree-item .sc-tree-score {
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 500;
+}

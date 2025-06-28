@@ -114,10 +114,28 @@ export async function post_process(ctx, container, opts = {}) {
   /* Re‑render tree & stats                                              */
   /* ------------------------------------------------------------------ */
   const tree_el  = container.querySelector('.sc-context-tree');
-  const stats_el = container.querySelector('.sc-context-stats');
+  const context_tree_container = await ctx.env.render_component('context_tree', ctx, { ...opts, update_callback })
+  // add score to label if present in data.context_items{}.key.score
+  const context_items_with_score = Object.entries(ctx.data.context_items)
+    .filter(([key, value]) => {
+      return value?.score !== undefined && value?.score !== null;
+    })
+    .forEach(([key, value]) => {
+      const label = context_tree_container.querySelector(`.sc-tree-item[data-path="${key}"]`);
+      if (label) {
+        // const label_text = label.textContent;
+        const score_span = this.create_doc_fragment(`<span class="sc-tree-score" title="Relevance score">${value.score.toFixed(2)}</span>`);
+        // this.empty(label);
+        label.insertAfter(score_span, label.querySelector('.sc-tree-remove'));
+        // label.appendChild(document.createTextNode(` ${label_text}`));
+      }
+    });
+  ;
   tree_el.replaceWith(
-    await ctx.env.render_component('context_tree', ctx, { ...opts, update_callback })
+    context_tree_container
   );
+
+  const stats_el = container.querySelector('.sc-context-stats');
   stats_el.replaceWith(
     await ctx.env.render_component('context_stats', ctx, { ...opts })
   );
