@@ -1,7 +1,7 @@
 import { CollectionItem } from 'smart-collections';
 import { add_thread_item, list_thread_items } from '../utils/add_thread_item.js';
 import { contains_self_referential_keywords } from '../utils/self_referential_keywords.js';
-import { build_file_tree_string } from 'smart-utils/file_tree.js';
+import { replace_folder_tree_var } from 'smart-context-obsidian/src/utils/replace_folder_tree_var.js';
 
 /**
  * @class SmartChatThread
@@ -129,10 +129,7 @@ export class SmartChatThread extends CollectionItem {
 
     // If the prompt contains {{folder_tree}}, replace it with the folder tree string.
     if (prompt.includes('{{folder_tree}}')) {
-      let paths = this.env.smart_sources?.fs?.folder_paths ?? [];
-      paths = paths.map(p => p.endsWith('/') ? p : p + '/'); // Ensure all paths end with a slash
-      const tree = build_file_tree_string([...new Set(paths)]);
-      prompt = prompt.replace(/{{\s*folder_tree\s*}}/gi, tree);
+      prompt = replace_folder_tree_var(prompt);
     }
 
     return prompt;
