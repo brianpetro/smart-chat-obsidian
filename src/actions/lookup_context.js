@@ -84,9 +84,13 @@ export async function lookup_context(params = {}) {
 
   // Folder scoping
   if (in_folder && in_folder !== '/') {
-    if (!other_params.filter.key_starts_with) {
-      const folder_prefix = in_folder.endsWith('/') ? in_folder : `${in_folder}/`;
-      other_params.filter.key_starts_with = folder_prefix;
+    if(env.smart_sources.fs.folders[in_folder]){
+      if (!other_params.filter.key_starts_with) {
+        const folder_prefix = in_folder.endsWith('/') ? in_folder : `${in_folder}/`;
+        other_params.filter.key_starts_with = folder_prefix;
+      }
+    }else{
+      console.warn(`Folder "${in_folder}" does not exist in the vault. Skipping folder scoping.`);
     }
   }
 
@@ -151,7 +155,7 @@ export const tool = {
         in_folder: {
           type: 'string',
           description:
-            "Use only if absolutely required. Prefer excluding this parameter. Limits the lookup to items in this folder."
+            "Use only if absolutely required. Exclude unles asked for a specific folder. Limits the lookup to items in this folder."
         },
         // EXCLUDED because used internally and the model currently isn't aware of the current context key
         // context_key: {
