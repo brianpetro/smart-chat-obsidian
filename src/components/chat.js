@@ -27,6 +27,9 @@ export function build_html(chat_threads_collection, opts = {}) {
         <button title="Chat Settings" id="smart-chat-chat-settings-button">
           ${this.get_icon_html('settings')}
         </button>
+        <button title="Chat Help" id="smart-chat-chat-help-button">
+          ${this.get_icon_html('help-circle')}
+        </button>
       </div>
       <div class="smart-chat-threads-container"></div>
       <div class="smart-chat-brand">
