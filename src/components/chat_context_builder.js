@@ -40,7 +40,7 @@ export async function render(ctx, opts = {}) {
 
 /**
  * post_process – attaches chat‑specific behaviour.
- * Adds **Edit**, **Send**, and the new **Retrieve more** button.
+ * Adds **Edit**, **Send**, and the new **Retrieve more** button.
  *
  * @param {import('smart-contexts').SmartContext} ctx
  * @param {HTMLElement} container
@@ -70,7 +70,7 @@ export async function post_process(ctx, container, opts = {}) {
   }
 
   /* ------------------------------------------------------------------ */
-  /* Retrieve more button                                                */
+  /* Retrieve more button                                                */
   /* ------------------------------------------------------------------ */
   if (thread_has_user_message(thread)) {
     const retrieve_btn = document.createElement('button');
