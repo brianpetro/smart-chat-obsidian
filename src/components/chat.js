@@ -1,5 +1,6 @@
 import chat_css from './chat.css' with { type: 'css' };
 import { ChatHistoryModal } from '../chat_history_modal.js';
+import { StoryModal } from 'obsidian-smart-env/modals/story.js';
 
 /**
  * @function build_html
@@ -9,7 +10,7 @@ import { ChatHistoryModal } from '../chat_history_modal.js';
  * @returns {string}
  */
 export function build_html(chat_threads_collection, opts = {}) {
-  return `
+  return `<div>
     <div class="smart-chat-chat-container">
       <div class="smart-chat-top-bar-container">
         <input
@@ -27,7 +28,7 @@ export function build_html(chat_threads_collection, opts = {}) {
         <button title="Chat Settings" id="smart-chat-chat-settings-button">
           ${this.get_icon_html('settings')}
         </button>
-        <button title="Chat Help" id="smart-chat-chat-help-button">
+        <button title="Chat Help" id="smart-chat-help-button">
           ${this.get_icon_html('help-circle')}
         </button>
       </div>
@@ -41,7 +42,7 @@ export function build_html(chat_threads_collection, opts = {}) {
         </p>
       </div>
     </div>
-  `;
+  </div>`;
 }
 
 /**
@@ -56,8 +57,8 @@ export async function render(chat_threads_collection, opts = {}) {
   const frag = this.create_doc_fragment(html);
   chat_threads_collection.container = frag.querySelector('.smart-chat-chat-container');
   this.apply_style_sheet(chat_css);
-  post_process.call(this, chat_threads_collection, frag, opts);
-  return frag;
+  post_process.call(this, chat_threads_collection, chat_threads_collection.container, opts);
+  return chat_threads_collection.container;
 }
 
 /**
@@ -65,11 +66,11 @@ export async function render(chat_threads_collection, opts = {}) {
  * @description Attaches event listeners and calls thread.js for the active thread.
  * Also implements naming the chat thread by updating data.key.
  * @param {Object} chat_threads_collection
- * @param {DocumentFragment} frag
+ * @param {DocumentFragment} container
  * @param {Object} opts
  * @returns {Promise<DocumentFragment>}
  */
-export async function post_process(chat_threads_collection, frag, opts = {}) {
+export async function post_process(chat_threads_collection, container, opts = {}) {
   const env = chat_threads_collection.env;
   const threads_container = chat_threads_collection.container.querySelector('.smart-chat-threads-container');
   let active_thread = chat_threads_collection.active_thread;
@@ -90,7 +91,7 @@ export async function post_process(chat_threads_collection, frag, opts = {}) {
   }
 
   // 1) Implement naming the chat thread + default timestamp
-  const thread_name_input = frag.querySelector('.smart-chat-chat-name-input');
+  const thread_name_input = container.querySelector('.smart-chat-chat-name-input');
   if (thread_name_input) {
     // Show timestamp as a default if current key is empty
     // or if it starts with 'Untitled Chat ...'
@@ -122,8 +123,8 @@ export async function post_process(chat_threads_collection, frag, opts = {}) {
 
     // Helper function to get current thread from event
     const get_current_thread_from_event = (e) => {
-      const container = e.target.closest('.smart-chat-chat-container');
-      const thread_key = container.querySelector('[data-thread-key]').dataset.threadKey;
+      const chat_container = e.target.closest('.smart-chat-chat-container');
+      const thread_key = chat_container.querySelector('[data-thread-key]').dataset.threadKey;
       return chat_threads_collection.get(thread_key);
     };
     
@@ -187,7 +188,16 @@ export async function post_process(chat_threads_collection, frag, opts = {}) {
     });
   }
 
-  return frag;
+  /* Help */
+  container.querySelector('#smart-chat-help-button')?.addEventListener('click', () =>
+    StoryModal.open(plugin, {
+      title: 'Getting Started With Smart Chat',
+      url: 'https://smartconnections.app/story/smart-connections-getting-started/?utm_source=smart-chat-help#page=chat-interface-1'
+    })
+  );
+
+
+  return container;
 }
 
 /**
