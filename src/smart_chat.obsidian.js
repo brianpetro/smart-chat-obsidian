@@ -63,21 +63,18 @@ export class SmartChatView extends ItemView {
     this.containerEl.appendChild(frag);
   }
 
-  /**
-   * Opens the Smart Chat view in the workspace.
-   * @param {import('obsidian').Plugin} plugin - Obsidian plugin instance.
-   */
-  static open(plugin=this.last_plugin) {
-    const leaf = plugin.app.workspace.getLeavesOfType(this.view_type)[0];
-    if (leaf) {
-      leaf.setViewState({ type: this.view_type, active: true });
-      leaf.view?.render();
+  static open(plugin = this.last_plugin) {
+    const existing = plugin.app.workspace.getLeavesOfType(this.view_type)[0];
+    if (existing) {
+      existing.setViewState({ type: this.view_type, active: true });
+      existing.view?.render();
       return;
     }
-    const active_leaf = plugin.app.workspace.activeLeaf;
-    const new_leaf = plugin.app.workspace.createLeafBySplit(active_leaf, 'vertical');
-    new_leaf.setViewState({ type: this.view_type, active: true });
+
+    const root_leaf = plugin.app.workspace.getLeaf(true);
+    root_leaf.setViewState({ type: this.view_type, active: true });
   }
+
 
   /**
    * Registers the Smart Chat view with the plugin.
