@@ -48,7 +48,6 @@ export async function render(ctx, opts = {}) {
  * @returns {Promise<HTMLElement>}
  */
 export async function post_process(ctx, container, opts = {}) {
-  console.log('chat_context_builder.post_process', ctx, container, opts);
   const env        = ctx?.env;
   const completion = opts.completion;
   const thread          = completion.thread;
