@@ -1,4 +1,4 @@
-import { is_last_completion, thread_has_user_message } from '../utils/chat_context_utils.js';
+import { thread_has_user_message } from '../utils/chat_context_utils.js';
 import { ContextSelectorModal } from 'smart-context-obsidian/src/views/context_selector_modal.js';
 import context_builder_css from 'smart-context-obsidian/src/components/context_builder.css' with { type: 'css' };
 
@@ -75,7 +75,7 @@ export async function post_process(ctx, container, opts = {}) {
   /* ------------------------------------------------------------------ */
   /* Edit button                                                         */
   /* ------------------------------------------------------------------ */
-  if (is_last_completion(thread, completion)) {
+  if (completion === thread.current_completion) {
     const edit_btn = document.createElement('button');
     edit_btn.textContent = 'Edit context';
     edit_btn.addEventListener('click', () =>
@@ -85,6 +85,9 @@ export async function post_process(ctx, container, opts = {}) {
       })
     );
     actions_el.appendChild(edit_btn);
+  }else{
+    console.log("Not current completion, skipping edit button");
+    container.classList.add('sc-context-done');
   }
 
   /* ------------------------------------------------------------------ */
@@ -97,7 +100,7 @@ export async function post_process(ctx, container, opts = {}) {
       /* Create a follow‑up completion that reuses this context and
          instructs the model to call lookup_context again.              */
       const action_property = thread.collection.settings.use_tool_calls ? 'action_key' : 'action_xml_key';
-      thread.new_completion({
+      const next_completion = thread.init_completion({
         [action_property]: 'lookup_context',
         // Preserve the last user question so the model knows *why*
         user_message: thread.last_completion.data.user_message ?? '',
@@ -105,6 +108,10 @@ export async function post_process(ctx, container, opts = {}) {
           context_key: ctx.key,
         }
       });
+      env.render_component('completion', next_completion).then((next_container) => {
+        thread.message_container.appendChild(next_container);
+      });
+      container.classList.add('sc-context-done');
     });
     actions_el.appendChild(retrieve_btn);
   }

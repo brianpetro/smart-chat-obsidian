@@ -162,7 +162,9 @@
   max-width: 95%;
 }
 
-.smart-chat-completion-sequence:has(.smart-chat-message.assistant), .smart-chat-completion-sequence:has(.smart-chat-message.user) {
+/* .smart-chat-completion-sequence:has(.smart-chat-message.user), */
+.smart-chat-completion-sequence:has(.sc-context-done),
+.smart-chat-completion-sequence:has(.smart-chat-message.assistant){
   .sc-tree-remove,
   .sc-tree-connections,
   .sc-tree-links,

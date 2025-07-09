@@ -26,32 +26,26 @@ export class SmartChatThread extends CollectionItem {
     return this.collection.chat_model;
   }
 
-  new_completion(opts = {}) {
-    const completion_opts = {
+  init_completion(data={}) {
+    const completion_data = {
       key: `${this.key}-${Date.now()}`,
       thread_key: this.key,
       stream: this.collection.settings.stream,
-      ...opts
+      ...data
     };
-
     if (this.has_default_system_prompt && !this.completions[0]?.data?.system_message) {
-      completion_opts.system_message = this.get_system_prompt(completion_opts);
+      completion_data.system_message = this.get_system_prompt(completion_data);
     }
-
-    const completion = new this.env.smart_completions.item_type(this.env, completion_opts);
+    if(!completion_data.context_key) {
+      // If no context_key is provided, use the last completion's context_key if available
+      const last_context_key = this.last_completion?.data?.context_key;
+      completion_data.context_key = last_context_key || this.env.smart_contexts.new_context().key;
+    }
+    const completion = new this.env.smart_completions.item_type(this.env, completion_data);
     this.env.smart_completions.set(completion);
     completion.chat_model = this.chat_model;
+    this._current_completion = completion;
     add_thread_item(this, completion.key);
-    this.current_completion = completion;
-
-    if (this.message_container) {
-      completion.env.render_component('completion', completion).then(container => {
-        this.message_container.appendChild(container);
-      });
-    }
-
-    this.queue_save();
-    this.collection.process_save_queue();
     return completion;
   }
 
@@ -60,23 +54,11 @@ export class SmartChatThread extends CollectionItem {
    * @param {object|null} context
    */
   update_current_context(context, opts = {}) {
-    if (!this.current_completion) {
-      this.new_completion();
-    }
-
-    const comp = this.current_completion;
-
-    comp.data.context_key = context.key;
-  }
-
-  async update_current_completion(data = {}) {
-    if (!this.current_completion) return;
-    this.current_completion.data = { ...this.current_completion.data, ...data };
-    await this.current_completion.env.render_component('completion', this.current_completion);
+    this.current_completion.data.context_key = context?.key || null;
   }
 
   get current_completion() {
-    if (this._current_completion && this._current_completion.data.completion.responses.length !== 0) {
+    if (!this._current_completion || (this._current_completion && this._current_completion.data.completion.responses.length !== 0)) {
       this._current_completion = null;
     }
     return this._current_completion;
@@ -86,7 +68,7 @@ export class SmartChatThread extends CollectionItem {
   }
 
   get last_completion() {
-    return this.completions[this.completions.length - 2];
+    return this.completions.findLast(completion => completion.response);
   }
 
   get completion_keys() {

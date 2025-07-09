@@ -128,10 +128,14 @@ export async function post_process(completion, sequence_container, opts = {}) {
 
 
   if(!completion.data.context_key) {
-    const new_context = completion.env.smart_contexts.new_context();
-    completion.data.context_key = new_context.key;
+    const last_context_key = completion.thread.last_completion?.data?.context_key;
+    const context = last_context_key
+      ? completion.env.smart_contexts.get(last_context_key)
+      : completion.env.smart_contexts.new_context()
+    ;
+    completion.data.context_key = context.key;
   }
-  await render_context_container();
+  if(!completion.context_elm) await render_context_container();
 
   // If not streaming or done streaming, we may need the final assistant bubble
   if (!completion.response_elm && completion.response_text) {
@@ -149,13 +153,21 @@ export async function post_process(completion, sequence_container, opts = {}) {
     if (typing_indicator) typing_indicator.style.display = 'none';
 
     // init new completion with context_key
-    // if (completion === completion.thread.current_completion) {
-    const last_completion_key = completion.thread.completion_keys[completion.thread.completion_keys.length - 1];
-    if (last_completion_key === completion.key) {
-      completion.thread.new_completion({
+    
+    if (completion.thread.last_completion.key === completion.key) {
+      const next_completion = completion.thread.init_completion({
         context_key: completion.data.actions.lookup_context
       });
+      completion.env.render_component('completion', next_completion).then((next_container) => {
+        completion.thread.message_container.appendChild(next_container);
+      });
     }
+
+  }else if(completion.data.responses?.length > 0) {
+    const next_completion = completion.thread.init_completion();
+    completion.env.render_component('completion', next_completion).then((next_container) => {
+      completion.thread.message_container.appendChild(next_container);
+    });
   }
   
   async function render_context_container() {

@@ -17,9 +17,6 @@ export async function add_items_to_current_context (thread, paths = []) {
   const env = thread.env;
   if (!paths.length) return null;
 
-  // 1. Ensure there is a *current* completion.
-  if (!thread.current_completion) thread.new_completion();
-
   const completion = thread.current_completion;
   const ctx_key     = completion.data.context_key;
   const ctx         = ctx_key ? env.smart_contexts.get(ctx_key) : null;

@@ -118,9 +118,12 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
     this.safe_inner_html(message_container, `
       <div class="smart-chat-default-message">${initial_message}</div>
     `);
-    let current_completion = chat_thread.current_completion;
-    if(!current_completion) {
-      current_completion = chat_thread.new_completion();
+    if(!chat_thread.current_completion) {
+      chat_thread.current_completion = chat_thread.init_completion();
+    }
+    if(!chat_thread.current_completion.container) {
+      const completion_container = await env.render_component('completion', chat_thread.current_completion);
+      message_container.appendChild(completion_container);
     }
 
   }
@@ -151,13 +154,14 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
       // For example, automatically set action_key to trigger a context lookup
       const action_property = chat_thread.collection.settings.use_tool_calls ? 'action_key' : 'action_xml_key';
       data[action_property] = 'lookup_context';
+      data.action_opts = {
+        context_key: chat_thread.current_completion.data.context_key,
+      }
+      console.log({data});
     }
 
-    if (!chat_thread.current_completion) {
-      chat_thread.new_completion(data);
-    } else {
-      chat_thread.update_current_completion(data);
-    }
+    chat_thread.current_completion.data = { ...chat_thread.current_completion.data, ...data };
+    env.render_component('completion', chat_thread.current_completion);
 
     this.safe_inner_html(input_el, '<br>');
     input_el.dataset.hasContent = false;
@@ -185,7 +189,7 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
                 chat_thread.current_completion.data.context_key
               )
             : null,
-          opener_container: chat_thread.current_completion.context_elm,
+            opener_container: () => chat_thread.current_completion?.context_elm,
         }
       );
 
