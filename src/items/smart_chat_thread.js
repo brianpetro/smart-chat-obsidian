@@ -45,8 +45,8 @@ export class SmartChatThread extends CollectionItem {
     this.current_completion = completion;
 
     if (this.message_container) {
-      completion.env.render_component('completion', completion).then(frag => {
-        this.message_container.appendChild(frag);
+      completion.env.render_component('completion', completion).then(container => {
+        this.message_container.appendChild(container);
       });
     }
 
@@ -56,31 +56,17 @@ export class SmartChatThread extends CollectionItem {
   }
 
   /**
-   * Updates (or clears) the context for the current completion.
-   * Passing `null` or an empty-item context removes the context_key,
-   * preventing empty contexts from being sent to the model.
+   * Updates the context for the current completion.
    * @param {object|null} context
    */
-  async update_current_context(context, opts = {}) {
+  update_current_context(context, opts = {}) {
     if (!this.current_completion) {
       this.new_completion();
     }
 
     const comp = this.current_completion;
 
-    if (!context || !context.has_context_items) {
-      delete comp.data.context_key;
-    } else {
-      comp.data.context_key = context.key;
-    }
-    
-    if (comp.context_elm) {
-      comp.context_elm.remove();
-      comp.context_elm = null;
-    }
-    await comp.env.render_component('completion', comp, {
-      ...opts,
-    });
+    comp.data.context_key = context.key;
   }
 
   async update_current_completion(data = {}) {

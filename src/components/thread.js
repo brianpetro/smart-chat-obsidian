@@ -7,6 +7,7 @@ import { ContextSelectorModal } from 'smart-context-obsidian/src/views/context_s
 import { add_items_to_current_context } from '../utils/add_items_to_current_context.js';
 import { parse_dropped_data } from '../utils/parse_dropped_data.js';
 
+import { send_context_changed_event } from 'smart-context-obsidian/src/utils/send_context_changed_event.js';
 /**
  * Determines if the user has pressed Enter + the required modifier.
  * @param {KeyboardEvent} e
@@ -33,7 +34,7 @@ export function should_send_message(e, requiredModifier) {
  * build_html
  */
 export function build_html(chat_thread, opts = {}) {
-  return `
+  return `<div>
     <div class="smart-chat-thread" data-thread-key="${chat_thread.key}">
       <div class="smart-chat-message-container"></div>
       <div class="smart-chat-typing-indicator">
@@ -73,30 +74,32 @@ export function build_html(chat_thread, opts = {}) {
         </div>
       </div>
     </div>
-  `;
+  </div>`;
 }
 
 /**
  * render
  */
 export async function render(chat_thread, opts = {}) {
-  const html = build_html.call(this, chat_thread, opts);
-  const frag = this.create_doc_fragment(html);
-  this.apply_style_sheet(thread_css);
-  chat_thread.container = frag.querySelector('.smart-chat-thread');
-  post_process.call(this, chat_thread, frag, opts);
-  return frag;
+  if(!chat_thread.container) {
+    const html = build_html.call(this, chat_thread, opts);
+    const frag = this.create_doc_fragment(html);
+    this.apply_style_sheet(thread_css);
+    chat_thread.container = frag.querySelector('.smart-chat-thread');
+  }
+  post_process.call(this, chat_thread, chat_thread.container, opts);
+  return chat_thread.container;
 }
 
 /**
  * @function post_process
  * @description Attach event handlers, handle completions rendering, etc.
  * @param {Object} chat_thread
- * @param {DocumentFragment} frag
+ * @param {DocumentFragment} thread_container
  * @param {Object} opts
  * @returns {DocumentFragment}
  */
-export async function post_process(chat_thread, frag, opts = {}) {
+export async function post_process(chat_thread, thread_container, opts = {}) {
   const env = chat_thread.env;
   const plugin = env.smart_chat_plugin || env.smart_connections_plugin;
 
@@ -110,27 +113,16 @@ export async function post_process(chat_thread, frag, opts = {}) {
       const completion_frag = await completion_item.env.render_component('completion', completion_item, {});
       message_container.appendChild(completion_frag);
     }
-    if(chat_thread.add_context_elm) chat_thread.add_context_elm.remove();
   } else {
     const initial_message = get_initial_message(chat_thread.settings.language);
     this.safe_inner_html(message_container, `
       <div class="smart-chat-default-message">${initial_message}</div>
     `);
-    const btn = document.createElement('button');
-    btn.className = 'smart-chat-add-context-button';
-    btn.textContent = 'Add context';
-    btn.addEventListener('click', () => {
-      ContextSelectorModal.open(chat_thread.env, {
-        ctx           : null,
-        update_callback: (ctx) => chat_thread.update_current_context(ctx),
-      });
-    });
+    let current_completion = chat_thread.current_completion;
+    if(!current_completion) {
+      current_completion = chat_thread.new_completion();
+    }
 
-    const wrap = document.createElement('div');
-    wrap.className = 'smart-chat-add-context-container';
-    wrap.appendChild(btn);
-    chat_thread.add_context_elm = wrap;
-    message_container.appendChild(wrap);
   }
 
   // DOM references for user interaction
@@ -193,9 +185,7 @@ export async function post_process(chat_thread, frag, opts = {}) {
                 chat_thread.current_completion.data.context_key
               )
             : null,
-          update_callback: (ctx) => {
-            chat_thread.update_current_context(ctx);
-          }
+          opener_container: chat_thread.current_completion.context_elm,
         }
       );
 
@@ -243,15 +233,15 @@ export async function post_process(chat_thread, frag, opts = {}) {
       if (!paths.length) return;
 
       /* 2. single, idempotent context update */
-      await add_items_to_current_context(chat_thread, paths);
+      const updated_ctx = await add_items_to_current_context(chat_thread, paths);
 
-      /* 3. refresh builder UI if present */
-      chat_thread.current_completion &&
-        chat_thread.update_current_context(
-          chat_thread.env.smart_contexts.get(
-            chat_thread.current_completion.data.context_key
-          )
-        );
+
+      const target_elm = chat_thread.current_completion?.context_elm;
+      if(target_elm) {
+        send_context_changed_event(target_elm, updated_ctx);
+      } else {
+        console.warn('[smart-chat-obsidian] No current completion context element found for context update');
+      }
     });
   }
 
@@ -277,32 +267,5 @@ export async function post_process(chat_thread, frag, opts = {}) {
     chat_thread.container.appendChild(overlay_frag);
   }
 
-  return frag;
-}
-
-/**
- * Helper to add dropped file/link text to the current context completion
- * @param {Object} chat_thread
- * @param {string} path
- */
-async function add_drop_to_curr_context(chat_thread, path) {
-  const env = chat_thread.env;
-  const context_data = {
-    context_items: { [path]: {d: 0} }
-  };
-  let current_completion = chat_thread.current_completion;
-  if(!current_completion) {
-    current_completion = chat_thread.new_completion();
-  }
-  const old_key = current_completion.data.context_key;
-  const existing_ctx = old_key ? env.smart_contexts.get(old_key) : null;
-  if (existing_ctx) {
-    existing_ctx.add_item(path);
-    chat_thread.update_current_context(existing_ctx);
-  } else {
-    const ctx_item = env.smart_contexts.new_context({}, {
-      add_items: [path]
-    });
-    chat_thread.new_completion({ context_key: ctx_item.key });
-  }
+  return thread_container;
 }

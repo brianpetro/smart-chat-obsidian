@@ -1,5 +1,4 @@
 import completion_css from './completion.css' with { type: 'css' };
-import { ContextSelectorModal } from 'smart-context-obsidian/src/views/context_selector_modal.js';
 
 /**
  * @function build_html
@@ -9,10 +8,10 @@ import { ContextSelectorModal } from 'smart-context-obsidian/src/views/context_s
  * @returns {string}
  */
 export function build_html(completion, opts = {}) {
-  return `
+  return `<div>
     <div class="smart-chat-completion-sequence" data-completion-key="${completion.key}">
     </div>
-  `;
+  </div>`;
 }
 
 /**
@@ -26,13 +25,11 @@ export async function render(completion, opts = {}) {
   if (!completion.container) {
     const html = await build_html.call(this, completion, opts);
     const frag = this.create_doc_fragment(html);
+    completion.container = frag.querySelector('.smart-chat-completion-sequence');
     this.apply_style_sheet(completion_css);
-    post_process.call(this, completion, frag, opts);
-    return frag;
-  } else {
-    post_process.call(this, completion, completion.container, opts);
-    return completion.container;
   }
+  post_process.call(this, completion, completion.container, opts);
+  return completion.container;
 }
 
 /**
@@ -40,15 +37,11 @@ export async function render(completion, opts = {}) {
  * @description Renders (appends) user message, context review, assistant message in order.
  * Also handles streaming updates in chunk and done callbacks.
  * @param {Object} completion
- * @param {DocumentFragment} frag
+ * @param {HTMLElement} sequence_container
  * @param {Object} opts
  * @returns {Promise<DocumentFragment>}
  */
-export async function post_process(completion, frag, opts = {}) {
-  if (!completion.container) {
-    completion.container = frag.querySelector('.smart-chat-completion-sequence');
-  }
-
+export async function post_process(completion, sequence_container, opts = {}) {
   // Possibly render system, user, action blocks if not present
   if (!completion.system_elm && completion.data.system_message) {
     completion.system_elm = true;
@@ -133,51 +126,12 @@ export async function post_process(completion, frag, opts = {}) {
     });
   }
 
-  if ((completion.thread.current_completion === completion ) && !completion.thread.data.context_key) {
-    if (!completion.add_context_elm) {
-      const btn = document.createElement('button');
-      btn.className = 'smart-chat-add-context-button';
-      btn.textContent = 'Add context';
-      btn.addEventListener('click', () => {
-        ContextSelectorModal.open(completion.env, {
-          ctx           : null,
-          update_callback: (ctx) => completion.thread.update_current_context(ctx),
-        });
-      });
 
-      const wrap = document.createElement('div');
-      wrap.className = 'smart-chat-add-context-container';
-      wrap.appendChild(btn);
-
-      completion.add_context_elm = wrap;
-      completion.container.appendChild(wrap);
-      if (completion.thread?.add_context_elm) completion.thread.add_context_elm.remove();
-    }
-  } else if (completion.add_context_elm) {
-    completion.add_context_elm.remove();
-    completion.add_context_elm = null;
+  if(!completion.data.context_key) {
+    const new_context = completion.env.smart_contexts.new_context();
+    completion.data.context_key = new_context.key;
   }
-
-
-
-  // Now handle context builder:
-  if (!completion.context_elm && completion.data.context_key) {
-    if (completion.add_context_elm) {
-      completion.add_context_elm.remove();
-      completion.add_context_elm = null;
-    }
-    const context = completion.env.smart_contexts.get(completion.data.context_key);
-    if (context) {
-      const context_container = await completion.env.render_component(
-        'chat_context_builder',
-        context,
-        { completion }
-      );
-      completion.context_elm = context_container;
-      completion.container.querySelector('.sc-context-builder')?.remove();
-      completion.container.appendChild(completion.context_elm);
-    }
-  }
+  await render_context_container();
 
   // If not streaming or done streaming, we may need the final assistant bubble
   if (!completion.response_elm && completion.response_text) {
@@ -203,16 +157,35 @@ export async function post_process(completion, frag, opts = {}) {
       });
     }
   }
-
+  
+  async function render_context_container() {
+    const context = completion.env.smart_contexts.get(completion.data.context_key);
+    if (context) {
+      const context_container = await completion.env.render_component(
+        'chat_context_builder',
+        context,
+        { completion }
+      );
+      completion.context_elm = context_container;
+      completion.container.querySelector('.sc-context-builder')?.remove();
+      completion.container.appendChild(completion.context_elm);
+      context_container.addEventListener('smart-env:context-changed', (e) => {
+        const updated_ctx = e.detail.context;
+        completion.thread.update_current_context(updated_ctx);
+        render_context_container();
+      });
+    }
+  }
+  
   function scroll() {
     const message_container = completion.container.closest('.smart-chat-message-container');
     if (message_container) {
       message_container.scrollTop = message_container.scrollHeight;
     }
-    return frag;
+    return sequence_container;
   }
 
-  return frag;
+  return sequence_container;
 }
 async function update_action_message(completion) {
   if (completion.action_elm && completion.action_call) {

@@ -48,14 +48,30 @@ export async function render(ctx, opts = {}) {
  * @returns {Promise<HTMLElement>}
  */
 export async function post_process(ctx, container, opts = {}) {
+  console.log('chat_context_builder.post_process', ctx, container, opts);
   const env        = ctx?.env;
   const completion = opts.completion;
-  if (!completion) return container;
-
   const thread          = completion.thread;
-  const update_callback = (_ctx) => thread.update_current_context(_ctx);
   const actions_el      = container.querySelector('.sc-context-actions');
   this.empty(actions_el);
+  completion.thread.container.querySelector('.smart-chat-add-context-button')?.remove();
+  if (Object.keys(ctx.data.context_items || {}).length === 0) {
+    const btn = document.createElement('button');
+    btn.className = 'smart-chat-add-context-button';
+    btn.textContent = 'Add context';
+    btn.addEventListener('click', () => {
+      ContextSelectorModal.open(completion.env, {
+        ctx           : null,
+        opener_container: container,
+      });
+    });
+    const wrap = document.createElement('div');
+    wrap.className = 'smart-chat-add-context-container';
+    wrap.appendChild(btn);
+    container.appendChild(wrap);
+    return container;
+  }
+
 
   /* ------------------------------------------------------------------ */
   /* Edit button                                                         */
@@ -64,7 +80,10 @@ export async function post_process(ctx, container, opts = {}) {
     const edit_btn = document.createElement('button');
     edit_btn.textContent = 'Edit context';
     edit_btn.addEventListener('click', () =>
-      ContextSelectorModal.open(env, { ctx, update_callback })
+      ContextSelectorModal.open(env, {
+        ctx,
+        opener_container: container,
+      })
     );
     actions_el.appendChild(edit_btn);
   }
@@ -114,7 +133,9 @@ export async function post_process(ctx, container, opts = {}) {
   /* Re‑render tree & stats                                              */
   /* ------------------------------------------------------------------ */
   const tree_el  = container.querySelector('.sc-context-tree');
-  const context_tree_container = await ctx.env.render_component('context_tree', ctx, { ...opts, update_callback })
+  const context_tree_container = await ctx.env.render_component('context_tree', ctx, {
+    ...opts,
+  });
   // add score to label if present in data.context_items{}.key.score
   const context_items_with_score = Object.entries(ctx.data.context_items)
     .filter(([key, value]) => {

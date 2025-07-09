@@ -59,8 +59,8 @@ export class SmartChatView extends ItemView {
   async render() {
     await wait_for_env_to_load(this);
     this.containerEl.empty();
-    const frag = await this.env.render_component("chat", this.env.smart_chat_threads, {});
-    this.containerEl.appendChild(frag);
+    const container = await this.env.render_component("chat", this.env.smart_chat_threads, {});
+    this.containerEl.appendChild(container);
   }
 
   static open(plugin = this.last_plugin) {
