@@ -135,7 +135,10 @@ export async function post_process(completion, sequence_container, opts = {}) {
     ;
     completion.data.context_key = context.key;
   }
-  if(!completion.context_elm) await render_context_container();
+  const is_tool_call_only = Boolean(completion.data.action_key);
+  if (!is_tool_call_only && !completion.context_elm) {
+    await render_context_container();
+  }
 
   // If not streaming or done streaming, we may need the final assistant bubble
   if (!completion.response_elm && completion.response_text) {
@@ -151,19 +154,8 @@ export async function post_process(completion, sequence_container, opts = {}) {
       .closest('.smart-chat-thread')
       ?.querySelector('.smart-chat-typing-indicator');
     if (typing_indicator) typing_indicator.style.display = 'none';
-
-    // init new completion with context_key
-    
-    if (completion.thread.last_completion.key === completion.key) {
-      const next_completion = completion.thread.init_completion({
-        context_key: completion.data.actions.lookup_context
-      });
-      completion.env.render_component('completion', next_completion).then((next_container) => {
-        completion.thread.message_container.appendChild(next_container);
-      });
-    }
-
-  }else if(completion.data.responses?.length > 0) {
+  }
+  if(completion.thread.last_completion.key === completion.key) {
     const next_completion = completion.thread.init_completion();
     completion.env.render_component('completion', next_completion).then((next_container) => {
       completion.thread.message_container.appendChild(next_container);
