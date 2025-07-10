@@ -76,36 +76,34 @@ export async function post_process(chat_threads_collection, container, opts = {}
   let active_thread = chat_threads_collection.active_thread;
   const plugin = env.smart_chat_plugin || env.smart_connections_plugin;
 
-  // If no active thread, create a default new one
+  // If no active thread, only create a new thread if no threads exist
   if (!active_thread) {
-    active_thread = await chat_threads_collection.create_or_update({
-      key: 'Untitled Chat ' + Date.now()
-    });
-    chat_threads_collection.active_thread = active_thread;
+    const all_threads = Object.values(chat_threads_collection.items).filter(
+      thread => !thread.deleted
+    );
+    if (all_threads.length === 0) {
+      // Only create a new thread if truly none exist
+      console.log('No threads exist, creating a new thread...');
+      active_thread = await chat_threads_collection.create_or_update();
+      chat_threads_collection.active_thread = active_thread;
+    } else {
+      active_thread = all_threads[0];
+      chat_threads_collection.active_thread = active_thread;
+    }
   }
 
   // Render the active thread
   if (threads_container && active_thread) {
+    this.empty(threads_container);
     const thread_frag = await env.render_component('thread', active_thread, opts);
     threads_container.appendChild(thread_frag);
   }
 
-  // 1) Implement naming the chat thread + default timestamp
+   // 1) Implement naming the chat thread + default timestamp
   const thread_name_input = container.querySelector('.smart-chat-chat-name-input');
   if (thread_name_input) {
-    // Show timestamp as a default if current key is empty
-    // or if it starts with 'Untitled Chat ...'
-    if (!active_thread.key || /^Untitled Chat \d+$/.test(active_thread.key)) {
-      const ts = Date.now();
-      active_thread.data.key = `Untitled Chat ${ts}`;
-      // Make sure to re-set it in the collection
-      chat_threads_collection.set(active_thread);
-      thread_name_input.value = active_thread.key;
-    } else {
-      // Already has a custom key
-      thread_name_input.value = active_thread.key;
-    }
-
+    thread_name_input.value = active_thread.key;
+    
     // On blur or Enter -> rename the thread
     const renameHandler = (current_thread) => {
       const new_val = thread_name_input.value.trim();
@@ -151,9 +149,7 @@ export async function post_process(chat_threads_collection, container, opts = {}
     new_chat_button.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const new_thread = await chat_threads_collection.create_or_update({
-        key: 'Untitled Chat ' + Date.now()
-      });
+      const new_thread = await chat_threads_collection.create_or_update();
 
       chat_threads_collection.active_thread = new_thread;
       if (threads_container) {

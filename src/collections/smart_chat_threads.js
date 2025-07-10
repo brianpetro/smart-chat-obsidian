@@ -40,7 +40,7 @@ export class SmartChatThreads extends Collection {
     return thread;
   }
   set active_thread(thread) {
-    if (!thread) {
+    if (!thread?.key) {
       this.settings.active_thread_key = '';
       return;
     }

@@ -60,7 +60,7 @@ export async function render(completion, opts = {}) {
  */
 export async function post_process(completion, frag, opts = {}) {
   const container = frag.querySelector('.smart-chat-message-content');
-  const copy_button = container.querySelector('.smart-chat-message-copy-button');
+  const copy_button = frag.querySelector('.smart-chat-message-copy-button');
 
   /* Render assistant markdown */
   this.empty(container);

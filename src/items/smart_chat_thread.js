@@ -19,7 +19,13 @@ export class SmartChatThread extends CollectionItem {
   }
 
   get_key() {
-    return this.data.key || (this.data.key = Date.now().toString());
+    if (!this.data.key) {
+      const now = new Date();
+      const pad = n => n.toString().padStart(2, '0');
+      const formatted = `Untitled Chat ${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+      this.data.key = formatted;
+    }
+    return this.data.key;
   }
 
   get chat_model() {

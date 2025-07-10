@@ -44,7 +44,7 @@ export class ChatHistoryModal extends FuzzySuggestModal {
    */
   getItems() {
     return Object.values(this.env.smart_chat_threads.items).filter(
-      thread => thread.completions.length
+      thread => thread.completions.length > 1 || (thread.completions.length === 1 && thread.completions[0].response)
     );
   }
 
