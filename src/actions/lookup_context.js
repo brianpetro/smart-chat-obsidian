@@ -168,3 +168,11 @@ export const tool = {
     }
   }
 };
+
+export async function render_output(env, output, params) {
+  const context = env.smart_contexts.get(output);
+  if (!context) {
+    return `No context found for key: ${output}`;
+  }
+  return await env.render_component('context_builder', context);
+}
