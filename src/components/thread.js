@@ -118,9 +118,10 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
     this.safe_inner_html(message_container, `
       <div class="smart-chat-default-message">${initial_message}</div>
     `);
-    if(!chat_thread.current_completion) {
-      chat_thread.current_completion = chat_thread.init_completion();
-    }
+    // redundant since init_completion called in current_completion getter
+    // if(!chat_thread.current_completion) {
+    //   chat_thread.current_completion = chat_thread.init_completion();
+    // }
     if(!chat_thread.current_completion.container) {
       const completion_container = await env.render_component('completion', chat_thread.current_completion);
       message_container.appendChild(completion_container);
