@@ -7,6 +7,7 @@ import { smart_env_config } from "./smart_env.config.js";
 
 import {SmartChatView} from "./src/smart_chat.obsidian.js";
 import { SmartChatSettingTab } from "./src/settings_tab.js";
+import { register_smart_chat_codeblock } from './src/codeblocks/register.js';
 
 export default class SmartChatPlugin extends Plugin {
   compiled_smart_env_config = smart_env_config;
@@ -22,6 +23,7 @@ export default class SmartChatPlugin extends Plugin {
     await SmartEnv.wait_for({ loaded: true });
     SmartChatView.register_view(this);
     this.addSettingTab(new SmartChatSettingTab(this.app, this));
+    register_smart_chat_codeblock(this);
   }
 
   onunload() {
