@@ -152,13 +152,26 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
     if (sys_msg) data.system_message = chat_thread.get_system_prompt({ system_message: sys_msg });
     // If user has chosen to detect self-referential pronouns, do so now:
     if (chat_thread.has_self_referential_pronoun(user_text)) {
-      // For example, automatically set action_key to trigger a context lookup
-      const action_property = chat_thread.collection.settings.use_tool_calls ? 'action_key' : 'action_xml_key';
-      data[action_property] = 'lookup_context';
-      data.action_opts = {
-        context_key: chat_thread.current_completion.data.context_key,
+      /**
+       * Prevent redundant look‑ups:
+       * ‑ If the current completion already points at a context containing
+       *   at least one item (i.e. the user dragged material in manually),
+       *   **do not** enqueue a lookup_context action.
+       */
+      const ctx_key              = chat_thread.current_completion.data.context_key;
+      const existing_ctx         = env.smart_contexts.get(ctx_key);
+      const has_manual_context   = existing_ctx
+        && Object.keys(existing_ctx.data?.context_items ?? {}).length > 0;
+
+      if (!has_manual_context) {
+        // Automatically trigger lookup_context
+        const action_property   = chat_thread.collection.settings.use_tool_calls
+          ? 'action_key'
+          : 'action_xml_key';
+        data[action_property]   = 'lookup_context';
+        data.action_opts        = { context_key: ctx_key };
       }
-      console.log({data});
+      console.log({ data });
     }
 
     chat_thread.current_completion.data = { ...chat_thread.current_completion.data, ...data };
