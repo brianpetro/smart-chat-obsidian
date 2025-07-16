@@ -53,7 +53,7 @@ export async function post_process(ctx, container, opts = {}) {
   const thread          = completion.thread;
   const actions_el      = container.querySelector('.sc-context-actions');
   this.empty(actions_el);
-  completion.thread.container.querySelector('.smart-chat-add-context-button')?.remove();
+  completion.thread.container?.querySelector('.smart-chat-add-context-button')?.remove();
   if (Object.keys(ctx.data.context_items || {}).length === 0) {
     const btn = document.createElement('button');
     btn.className = 'smart-chat-add-context-button';
