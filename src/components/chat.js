@@ -102,12 +102,12 @@ export async function post_process(chat_threads_collection, container, opts = {}
    // 1) Implement naming the chat thread + default timestamp
   const thread_name_input = container.querySelector('.smart-chat-chat-name-input');
   if (thread_name_input) {
-    thread_name_input.value = active_thread.key;
+    thread_name_input.value = active_thread.name;
     
     // On blur or Enter -> rename the thread
     const renameHandler = (current_thread) => {
       const new_val = thread_name_input.value.trim();
-      if (!new_val || new_val === current_thread.key) {
+      if (!new_val || new_val === current_thread.name) {
         return;
       }
       rename_thread(chat_threads_collection, current_thread, new_val);
@@ -160,7 +160,7 @@ export async function post_process(chat_threads_collection, container, opts = {}
 
       // Also set the top bar's name input
       if (thread_name_input) {
-        thread_name_input.value = new_thread.key;
+        thread_name_input.value = new_thread.name;
       }
     });
   }
@@ -207,27 +207,14 @@ export async function open_plugin_settings(app) {
 }
 
 /**
- * Renames the thread (changes data.key), re-registers with the collection,
- * and updates the active_thread_key if needed.
+ * Updates the thread name and queues a save.
  * @param {Object} collection
  * @param {Object} thread
- * @param {string} new_key
+ * @param {string} new_name
  */
-function rename_thread(collection, thread, new_key) {
-  const old_key = thread.key;
-  // Remove old key from items
-  delete collection.items[old_key];
+function rename_thread(collection, thread, new_name) {
+  thread.data.name = new_name;
 
-  thread.data.key = new_key;
-  // Re-register
-  collection.set(thread);
-
-  // If this was the active thread, update the setting
-  if (collection.settings.active_thread_key === old_key) {
-    collection.settings.active_thread_key = new_key;
-  }
-
-  // Mark for save
   thread.queue_save();
   collection.process_save_queue();
 }

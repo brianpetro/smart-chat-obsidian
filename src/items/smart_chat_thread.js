@@ -12,6 +12,7 @@ export class SmartChatThread extends CollectionItem {
   static get defaults() {
     return {
       data: {
+        name: '',
         system_prompt: '',
         items: {}
       }
@@ -26,6 +27,16 @@ export class SmartChatThread extends CollectionItem {
       this.data.key = formatted;
     }
     return this.data.key;
+  }
+
+  /**
+   * @property {string} name - Friendly thread name; falls back to key if empty.
+   */
+  get name() {
+    return this.data.name || this.data.key;
+  }
+  set name(val) {
+    this.data.name = val;
   }
 
   get chat_model() {

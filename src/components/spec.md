@@ -15,3 +15,9 @@ flowchart TD
   C -->|opens| E(Context Selector Modal)
   D -->|updates| F(thread)
 ```
+
+### chat.js
+
+| Function | Description |
+| --- | --- |
+| `rename_thread(collection, thread, new_name)` | Stores a friendly name in `data.name` and queues a save. |

@@ -17,6 +17,14 @@ export async function add_items_to_current_context (thread, paths = []) {
   const env = thread.env;
   if (!paths.length) return null;
 
+  if (!thread.current_completion) {
+    if (typeof thread.init_completion === 'function') {
+      thread.current_completion = thread.init_completion();
+    } else if (typeof thread.new_completion === 'function') {
+      thread.new_completion();
+    }
+  }
+
   const completion = thread.current_completion;
   const ctx_key     = completion.data.context_key;
   const ctx         = ctx_key ? env.smart_contexts.get(ctx_key) : null;

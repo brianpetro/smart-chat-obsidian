@@ -54,7 +54,7 @@ export class ChatHistoryModal extends FuzzySuggestModal {
    * @returns {string}
    */
   getItemText(thread) {
-    return thread.key;
+    return thread.name;
   }
 
   /**
