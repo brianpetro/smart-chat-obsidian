@@ -4,16 +4,19 @@
 
 | Function | Description |
 | --- | --- |
-| `render(ctx, opts)` | Renders a context builder element derived from `smart-context-obsidian`. Adds chat controls like **Edit** and **Send** when supplied a `completion`. |
+| `build_html(ctx, opts)` | Returns HTML markup for the context builder |
+| `render(ctx, opts)` | Renders the markup and calls `post_process`. Adds chat controls like **Edit**, **Send**, and **Retrieve more**. |
 | `post_process(ctx, container, opts)` | Attaches chat-specific behaviour to the builder element. |
 
 ```mermaid
 flowchart TD
-  A[completion] --> B{chat_context_builder}
-  B --> C[Edit]
-  B --> D[Send]
-  C -->|opens| E(Context Selector Modal)
-  D -->|updates| F(thread)
+	A[completion] --> B{chat_context_builder}
+	B --> C[Edit]
+	B --> D[Send]
+	B --> G[Retrieve more]
+	C -->|opens| E(Context Selector Modal)
+	D -->|updates| F(thread)
+	G -->|new completion| F
 ```
 
 ### chat.js
