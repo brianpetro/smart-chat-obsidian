@@ -105,6 +105,19 @@
   outline: none;
   min-height: 1.5em;
 }
+.smart-chat-add-variable {
+  background: var(--background-modifier-form-field);
+  border: var(--border-width) solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 var(--size-4-2);
+  height: var(--size-4-5);
+}
+.smart-chat-add-variable:hover {
+  background: var(--interactive-accent-hover);
+  color: var(--text-on-accent);
+}
 
 .smart-chat-chat-input-row {
   display: flex;

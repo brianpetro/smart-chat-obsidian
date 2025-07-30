@@ -24,3 +24,19 @@ flowchart TD
 | Function | Description |
 | --- | --- |
 | `rename_thread(collection, thread, new_name)` | Stores a friendly name in `data.name` and queues a save. |
+
+### thread.js
+
+| Function | Description |
+| --- | --- |
+| `insert_variable_at_cursor(el, variable)` | Inserts text at the user's caret position within the chat input. |
+| `create_variable_menu(MenuClass, app, vars, on_select)` | Builds an Obsidian `Menu` listing completion variables. |
+
+System prompt editor includes an **Add variable** button. Clicking it opens a native menu of `env.config.collections.smart_completions.completion_adapters.SmartCompletionVariableAdapter.available_vars` and inserts the chosen variable into the user message input.
+
+```mermaid
+flowchart TD
+	B[Add variable] --> M{variable list}
+	M -->|select| I(insert_variable_at_cursor)
+	I --> C[chat input]
+```

@@ -6,6 +6,8 @@ import { ContextSelectorModal } from 'smart-context-obsidian/src/views/context_s
 // import { insert_text_in_chunks } from '../utils/chunk_insert.js';
 import { add_items_to_current_context } from '../utils/add_items_to_current_context.js';
 import { parse_dropped_data } from '../utils/parse_dropped_data.js';
+import { Menu } from 'obsidian';
+import { insert_variable_at_cursor, create_variable_menu } from './variable_utils.js';
 
 import { send_context_changed_event } from 'smart-context-obsidian/src/utils/send_context_changed_event.js';
 /**
@@ -30,6 +32,7 @@ export function should_send_message(e, requiredModifier) {
   return false;
 }
 
+
 /**
  * build_html
  */
@@ -53,6 +56,7 @@ export function build_html(chat_thread, opts = {}) {
             contenteditable="true"
             placeholder="Edit system message"
           ></div>
+          <button class="smart-chat-add-variable" title="Add variable" type="button">+</button>
         </div>
         <div class="smart-chat-chat-input-row">
           <div
@@ -134,12 +138,25 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
   const input_el = chat_thread.container.querySelector('.smart-chat-chat-input');
   const system_editor = chat_thread.container.querySelector('.smart-chat-system-message');
   const system_label = chat_thread.container.querySelector('.smart-chat-system-message-label');
+  const variable_btn = chat_thread.container.querySelector('.smart-chat-add-variable');
 
   // Toggle system prompt editor on label click
   if (system_label && system_editor) {
     system_label.addEventListener('click', () => {
       system_editor.style.display = 'block';
       system_label.style.display = 'none';
+    });
+  }
+
+  if (variable_btn) {
+    variable_btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const vars =
+        env.config.collections.smart_completions.completion_adapters.SmartCompletionVariableAdapter.available_vars;
+      const menu = create_variable_menu(Menu, plugin.app, vars, (v) => {
+        insert_variable_at_cursor(input_el, v);
+      });
+      menu.showAtMouseEvent(e);
     });
   }
 
