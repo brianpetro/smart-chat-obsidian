@@ -20,7 +20,9 @@ export class ThreadCompletionAdapter extends SmartCompletionAdapter {
       get(){
         const thread_key = completion.data.thread_key;
         if(!thread_key) return null;
-        return completion.env.smart_chat_threads.get(thread_key);
+        return completion.env.smart_chat_threads.get(thread_key)
+          || completion.env.smart_chat_threads.active_thread // TEMP 2025-07-30: fallback to active thread (for handling legacy data from threads saved with different key)
+        ;
       }
     });
   }
