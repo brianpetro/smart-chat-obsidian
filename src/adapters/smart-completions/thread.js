@@ -36,7 +36,7 @@ export class ThreadCompletionAdapter extends SmartCompletionAdapter {
     if(!thread_key) return;
 
     const thread = this.item.thread;
-    if (thread.current_completion !== this.item) return console.log('ThreadCompletionAdapter: skipping thread, not the current completion');
+    if (thread.current_completion.key !== this.item.key) return console.log('ThreadCompletionAdapter: skipping thread, not the current completion');
 
     const thread_collection = this.item.env.smart_chat_threads;
     if(!thread_collection) {

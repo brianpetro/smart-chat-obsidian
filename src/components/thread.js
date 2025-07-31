@@ -188,7 +188,6 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
         data[action_property]   = 'lookup_context';
         data.action_opts        = { context_key: ctx_key };
       }
-      console.log({ data });
     }
 
     chat_thread.current_completion.data = { ...chat_thread.current_completion.data, ...data };
