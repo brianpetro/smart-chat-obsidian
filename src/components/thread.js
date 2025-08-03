@@ -47,8 +47,9 @@ export function build_html(chat_thread, opts = {}) {
           <div class="smart-chat-typing-dot"></div>
         </div>
       </div>
+      <div class="smart-chat-action-bar">
+      </div>
       <div class="smart-chat-chat-form">
-        <div class="smart-chat-build-chat-context"></div>
         <div class="smart-chat-system-message-container">
           <small class="smart-chat-system-message-label">Edit system message</small>
           <div
