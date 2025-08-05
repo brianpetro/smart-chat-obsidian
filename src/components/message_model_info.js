@@ -5,7 +5,7 @@
  * provider that produced a completion.
  *
  * Example output (inherits .system styles):
- *   Model: gpt-4o (openai)
+ *   Model: gpt-4o (openai)
  */
 
 export function build_html(completion, opts = {}) {
