@@ -10,6 +10,9 @@
   gap: var(--size-4-3);
   user-select: text;
   container-type: inline-size;
+  &:not(:has(.smart-chat-message)) {
+    flex-grow: 1;
+  }
 }
 
 

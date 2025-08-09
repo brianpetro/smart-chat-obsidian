@@ -60,7 +60,7 @@ export async function post_process(completion, sequence_container, opts = {}) {
   if (!completion.user_elm && completion.data.user_message) {
     completion.user_elm = await completion.env.render_component('message_user', completion);
     completion.container.appendChild(completion.user_elm);
-    scroll();
+    if(!completion.response) scroll();
   }
   if (!completion.action_elm && completion.data.action_key) {
     const action_frag = await completion.env.render_component('message_action', completion);
@@ -75,6 +75,7 @@ export async function post_process(completion, sequence_container, opts = {}) {
       ?.querySelector('.smart-chat-typing-indicator');
     if (typing_indicator) typing_indicator.style.display = 'block';
 
+    scroll();
     await completion.init({
       stream: completion.env.smart_chat_threads.settings.stream,
       stream_handlers: {
@@ -98,7 +99,6 @@ export async function post_process(completion, sequence_container, opts = {}) {
           }
           // update action_elm if present
           await update_action_message.call(this, c);
-          scroll();
           this.handling_chunk = false;
         },
         done: async (c) => {
@@ -115,7 +115,6 @@ export async function post_process(completion, sequence_container, opts = {}) {
             }
           }
           await update_action_message.call(this, c);
-          scroll();
           this.handling_chunk = false;
         },
         error: (err) => {
@@ -127,19 +126,12 @@ export async function post_process(completion, sequence_container, opts = {}) {
     completion.thread.queue_save();
     completion.queue_save();
     completion.thread.collection.process_save_queue();
+    completion.collection.process_save_queue();
+    completion.container.style.minHeight = '';
   }
 
-
-  if(!completion.data.context_key) {
-    const last_context_key = completion.thread.last_completion?.data?.context_key;
-    const context = last_context_key
-      ? completion.env.smart_contexts.get(last_context_key)
-      : completion.env.smart_contexts.new_context()
-    ;
-    completion.data.context_key = context.key;
-  }
   const is_tool_call_only = Boolean(completion.data.action_key);
-  if (!is_tool_call_only && !completion.context_elm) {
+  if (!is_tool_call_only && !completion.context_elm && (!completion.response || completion.data.completion.used_context)) {
     await render_context_container();
   }
 
@@ -149,7 +141,6 @@ export async function post_process(completion, sequence_container, opts = {}) {
     completion.container.appendChild(completion.response_elm);
   }
   await update_action_message.call(this, completion);
-  scroll();
 
   // Tool call scenario (e.g. "lookup_context")
   if (completion.data.actions?.lookup_context) {
@@ -166,7 +157,17 @@ export async function post_process(completion, sequence_container, opts = {}) {
   }
   
   async function render_context_container() {
-    const context = completion.env.smart_contexts.get(completion.data.context_key);
+    // TODO: move context retrieval logic to chat_thread.ensure_ctx()
+    let context;
+    context = completion.env.smart_contexts.get(completion.data.context_key || '');
+    if(!context) {
+      const last_context_key = completion.thread.last_completion?.data?.context_key || '';
+      context = completion.env.smart_contexts.get(last_context_key);
+    }
+    if(!context) {
+      context = completion.env.smart_contexts.new_context();
+    }
+    completion.data.context_key = context.key;
     if (context) {
       const context_container = await completion.env.render_component(
         'chat_context_builder',
@@ -186,10 +187,21 @@ export async function post_process(completion, sequence_container, opts = {}) {
   
   function scroll() {
     const message_container = completion.container.closest('.smart-chat-message-container');
-    if (message_container) {
-      message_container.scrollTop = message_container.scrollHeight;
+    const {top: container_top, height: container_height} = message_container.getBoundingClientRect();
+    const {top: target_top, height: target_height} = completion.container.getBoundingClientRect();
+    if(target_height < (container_height - 100)) {
+      completion.container.style.minHeight = `${container_height - 100}px`;
+    } else {
+      completion.container.style.minHeight = '';
     }
-    return sequence_container;
+    const should_scroll = target_top > (container_top + 100);
+    if (should_scroll){
+      // // smooth scroll
+      message_container.scrollTo({
+        top: message_container.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }
 
   return sequence_container;

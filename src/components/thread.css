@@ -32,7 +32,6 @@
   flex-direction: column;
   color: var(--text-muted);
   font-size: var(--font-ui-medium);
-  height: 100%;
   margin-top: auto;
   margin-bottom: auto;
   opacity: 0.7;
