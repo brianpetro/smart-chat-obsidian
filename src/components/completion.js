@@ -127,7 +127,7 @@ export async function post_process(completion, sequence_container, opts = {}) {
     completion.queue_save();
     completion.thread.collection.process_save_queue();
     completion.collection.process_save_queue();
-    completion.container.style.minHeight = '';
+    completion.container.style.marginBottom = '';
   }
 
   const is_tool_call_only = Boolean(completion.data.action_key);
@@ -190,9 +190,9 @@ export async function post_process(completion, sequence_container, opts = {}) {
     const {top: container_top, height: container_height} = message_container.getBoundingClientRect();
     const {top: target_top, height: target_height} = completion.container.getBoundingClientRect();
     if(target_height < (container_height - 100)) {
-      completion.container.style.minHeight = `${container_height - 100}px`;
+      completion.container.style.marginBottom = `${container_height - 100}px`;
     } else {
-      completion.container.style.minHeight = '';
+      completion.container.style.marginBottom = '';
     }
     const should_scroll = target_top > (container_top + 100);
     if (should_scroll){
