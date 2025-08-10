@@ -88,7 +88,7 @@ export class SmartChatThreads extends Collection {
       "system_prompt": {
         name: "System Prompt",
         type: "textarea",
-        description: "Prepended to every thread as the system role message. You can include {{folder_tree}} to embed your vault's folder structure.",
+        description: "Prepended to every thread as the system role message. Available variables: {{folder_tree}}, {{folders_top}}, {{tags}}, {{recent_N}}.",
       },
       "stream": {
         name: "Stream",
