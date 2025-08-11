@@ -81,6 +81,10 @@ export class SmartChatView extends ItemView {
    * @param {import('obsidian').Plugin} plugin - Obsidian plugin instance.
    */
   static register_view(plugin) {
+    if(
+      plugin.app.plugins.enabledPlugins.has('smart-chat')
+      && plugin.manifest.id !== 'smart-chat'
+    ) return console.log(`Skipping Smart Chat registration for plugin ${plugin.manifest.id} since dedicated Smart Chat plugin is enabled.`);
     this.last_plugin = plugin;
     plugin.registerView(this.view_type, (leaf) => new this(leaf, plugin));
     plugin.addRibbonIcon(this.icon, "Open: " + this.view_name, () => {
