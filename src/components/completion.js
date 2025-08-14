@@ -160,7 +160,7 @@ export async function post_process(completion, sequence_container, opts = {}) {
     // TODO: move context retrieval logic to chat_thread.ensure_ctx()
     let context;
     context = completion.env.smart_contexts.get(completion.data.context_key || '');
-    if(!context) {
+    if(!context && completion.thread) {
       const last_context_key = completion.thread.last_completion?.data?.context_key || '';
       context = completion.env.smart_contexts.get(last_context_key);
     }
