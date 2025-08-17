@@ -157,7 +157,7 @@ export async function post_process(completion, sequence_container, opts = {}) {
   }
   
   async function render_context_container() {
-    // TODO: move context retrieval logic to chat_thread.ensure_ctx()
+    // TODO: move context retrieval logic to ensure_chat_ctx()
     let context;
     context = completion.env.smart_contexts.get(completion.data.context_key || '');
     if(!context && completion.thread) {
