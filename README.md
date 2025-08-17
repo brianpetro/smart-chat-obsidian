@@ -5,9 +5,18 @@ Talk to your notes without leaving Obsidian
 > [!QUESTION] **Why juggle browser tabs?**
 > Chat directly inside your vault with context-aware responses.
 
+> [!WARNING] **The Problem**
+> Switching between the browser and Obsidian breaks your flow and scatters conversations.
+
 # Smart Chat (Obsidian Plugin)
 
 Smart Chat adds a powerful chat interface to Obsidian using the [Smart Environment](https://github.com/brianpetro/jsbrains/tree/main/smart-environment) architecture. It allows you to chat with an AI model while dynamically pulling context from your Obsidian vault, creating new chat threads, injecting context or system prompts, and more.
+
+✔️ Context-aware responses from your vault
+
+🔐 Private & local-first by default
+
+🤖 Works with local models like Ollama
 
 ## How It Works
 
@@ -129,3 +138,11 @@ When you enable Smart Chat in Obsidian:
 - The plugin logs diagnostic info to the console, such as how it compiles ephemeral context and sets up actions.
 - If you want to update the code and test quickly, run the build script again and re-load the plugin in Obsidian.
 
+## Built for You
+
+> Smart Chat started as a personal tool to keep conversations and context together. The Obsidian community has helped shape it into a flexible interface for local-first AI workflows.
+
+## FAQs & Troubleshooting
+
+### How do I use Smart Chat with Open WebUI (Ollama)?
+Set the `path` setting to `api/chat/completions` in **Settings → Smart Chat → Path**.
