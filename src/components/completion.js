@@ -150,7 +150,7 @@ export async function post_process(completion, sequence_container, opts = {}) {
     if (typing_indicator) typing_indicator.style.display = 'none';
   }
   if(completion.thread?.last_completion?.key === completion.key) {
-    const next_completion = completion.thread.init_completion();
+    const next_completion = completion.thread.current_completion;
     completion.env.render_component('completion', next_completion).then((next_container) => {
       completion.thread.message_container.appendChild(next_container);
     });

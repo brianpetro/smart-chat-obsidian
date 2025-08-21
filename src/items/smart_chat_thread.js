@@ -75,8 +75,11 @@ export class SmartChatThread extends CollectionItem {
   }
 
   get current_completion() {
+    const most_recent_completion = this.completions.at(-1);
+    if (most_recent_completion && most_recent_completion.data.completion.responses.length === 0) {
+      this._current_completion = most_recent_completion;
+    }
     if (!this._current_completion || (this._current_completion && this._current_completion.data.completion.responses.length !== 0)) {
-      // this._current_completion = null;
       this._current_completion = this.init_completion(); // prevent current_completion from being null and causing downstream errors
     }
     return this._current_completion;
