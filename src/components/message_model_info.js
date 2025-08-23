@@ -43,7 +43,7 @@ function should_show_model_info(completion) {
 
   const prev = thread.last_completion;
   const cm_prev = prev?.data?.completion?.chat_model;
-  const cm_curr = completion === thread.current_completion
+  const cm_curr = (completion === thread.current_completion) && completion.chat_model
     ? {
         model_key: completion.chat_model.model_key,
         platform_key: completion.chat_model.adapter_name,
