@@ -8,6 +8,7 @@ import { SmartCompletionAdapter } from 'smart-completions/adapters/_adapter.js';
  * and appends each message from the thread into `completion.request.messages`.
  */
 export class ThreadCompletionAdapter extends SmartCompletionAdapter {
+  static version = 0.1;
   static order = -1;
   /**
    * @returns {string}
