@@ -245,14 +245,20 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
   /**
    * non-blocking paste handler
    */
-  input_el.addEventListener('paste', e => {
+  // Use a named handler and attach it only once to prevent multiple listeners
+  function handle_paste(e) {
     e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
+    const text = e.clipboardData?.getData('text/plain');
     if (text) {
-      insert_text_in_chunks(input_el, text, { chunk_size: 2048 });
-      input_el.dataset.hasContent = true;
+      const target = e.currentTarget;
+      insert_text_in_chunks(target, text, { chunk_size: 2048 });
+      target.dataset.hasContent = true;
     }
-  });
+  }
+  if (!input_el._scPasteHandler) {
+    input_el._scPasteHandler = handle_paste;
+    input_el.addEventListener('paste', input_el._scPasteHandler);
+  }
 
   // Drag-and-Drop: adding dropped files or text to the current context
   const sc_thread_el = chat_thread.container;
