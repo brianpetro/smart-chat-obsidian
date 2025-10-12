@@ -18,6 +18,7 @@ import { render as message_system_component } from './src/components/message_sys
 import { render as message_user_component } from './src/components/message_user.js';
 import { render as overlay_requires_settings_component } from './src/components/overlay_requires_settings.js';
 import { render as thread_component } from './src/components/thread.js';
+import { lookup_context as lookup_context_action } from './src/actions/lookup_context.js';
 
 export const smart_env_config = {
   collections: {
@@ -30,19 +31,26 @@ export const smart_env_config = {
     SmartAction,
     SmartChatThread
   },
+  items: {
+    smart_action: { class: SmartAction },
+    smart_chat_thread: { class: SmartChatThread }
+  },
   components: {
-    chat: chat_component,
-    chat_context_builder: chat_context_builder_component,
-    chat_model_settings: chat_model_settings_component,
-    chat_thread_settings: chat_thread_settings_component,
-    completion: completion_component,
-    confirm_delete: confirm_delete_component,
-    message_action: message_action_component,
-    message_assistant: message_assistant_component,
-    message_model_info: message_model_info_component,
-    message_system: message_system_component,
-    message_user: message_user_component,
-    overlay_requires_settings: overlay_requires_settings_component,
-    thread: thread_component
+    chat: { render: chat_component },
+    chat_context_builder: { render: chat_context_builder_component },
+    chat_model_settings: { render: chat_model_settings_component },
+    chat_thread_settings: { render: chat_thread_settings_component },
+    completion: { render: completion_component },
+    confirm_delete: { render: confirm_delete_component },
+    message_action: { render: message_action_component },
+    message_assistant: { render: message_assistant_component },
+    message_model_info: { render: message_model_info_component },
+    message_system: { render: message_system_component },
+    message_user: { render: message_user_component },
+    overlay_requires_settings: { render: overlay_requires_settings_component },
+    thread: { render: thread_component }
+  },
+  actions: {
+    lookup_context: { action: lookup_context_action }
   }
 };
