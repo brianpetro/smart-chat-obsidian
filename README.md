@@ -45,7 +45,7 @@ When you enable Smart Chat in Obsidian:
 	 - The main plugin entry point. It sets up the environment (`SmartEnv.create`) and merges its own `smart_env_config` with any from `./dist/smart_env.config.js`.
 	 - Registers a custom view called "smart-chat-view," which displays the chat UI.
 
-2. **`build_smart_env_config.js`**  
+2. **`obsidian-smart-env/build/build_env_config.js`**  
 	 - Scans `./src` for collections, items, and components.
 	 - Generates `./dist/smart_env.config.js`, which tells the environment what to load and how.
 
@@ -96,7 +96,7 @@ When you enable Smart Chat in Obsidian:
 
 2. **Build**  
 	 Run `npm run build`. This does two steps:
-	 - `node build_smart_env_config.js` (scans for items/components)
+	 - `node obsidian-smart-env/build/build_env_config.js` (scans for items/components)
 	 - `node esbuild.js` (or your own bundler script)
 
 3. **Copy to Your Obsidian Vault's Plugins**  
