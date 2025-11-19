@@ -1,7 +1,5 @@
 import { Plugin, Notice, addIcon } from "obsidian";
 import { SmartEnv } from "obsidian-smart-env";
-import { merge_env_config } from "obsidian-smart-env";
-import { smart_env_config as smart_context_env_config } from "smart-context-obsidian/smart_env.config.js";
 
 import { smart_env_config } from "./smart_env.config.js";
 
@@ -13,8 +11,7 @@ export default class SmartChatPlugin extends Plugin {
   compiled_smart_env_config = smart_env_config;
 
   onload() {
-    const merged_config = merge_env_config(this.compiled_smart_env_config, smart_context_env_config);
-    SmartEnv.create(this, merged_config);
+    SmartEnv.create(this, this.compiled_smart_env_config);
     this.app.workspace.onLayoutReady(this.initialize.bind(this));
   }
 

@@ -1,7 +1,7 @@
 import { CollectionItem } from 'smart-collections';
 import { add_thread_item, list_thread_items } from '../utils/add_thread_item.js';
 import { contains_self_referential_keywords } from '../utils/self_referential_keywords.js';
-import { replace_folder_tree_var } from 'smart-context-obsidian/src/utils/replace_folder_tree_var.js';
+import { replace_folder_tree_var } from 'obsidian-smart-env/utils/replace_folder_tree_var.js';
 
 /**
  * @class SmartChatThread

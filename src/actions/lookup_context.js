@@ -174,5 +174,5 @@ export async function render_output(env, output, params) {
   if (!context) {
     return `No context found for key: ${output}`;
   }
-  return await env.render_component('context_builder', context);
+  return await env.render_component('smart_context_item', context);
 }

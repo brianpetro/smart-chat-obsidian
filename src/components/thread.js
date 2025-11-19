@@ -2,14 +2,12 @@ import thread_css from './thread.css' with { type: 'css' };
 import { get_initial_message } from '../utils/self_referential_keywords.js';
 import { Keymap } from 'obsidian';
 import { insert_text_in_chunks } from '../utils/insert_text_in_chunks.js';
-import { ContextSelectorModal } from 'smart-context-obsidian/src/views/context_selector_modal.js';
 // import { insert_text_in_chunks } from '../utils/chunk_insert.js';
 import { add_items_to_current_context } from '../utils/add_items_to_current_context.js';
 import { parse_dropped_data } from '../utils/parse_dropped_data.js';
 import { Menu } from 'obsidian';
 import { insert_variable_at_cursor, create_variable_menu } from './variable_utils.js';
 
-import { send_context_changed_event } from 'smart-context-obsidian/src/utils/send_context_changed_event.js';
 /**
  * Determines if the user has pressed Enter + the required modifier.
  * @param {KeyboardEvent} e
@@ -211,18 +209,15 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
 
     if (e.key === '@') {
       e.preventDefault();
-
-      ContextSelectorModal.open(
-        env,
-        {
-          ctx: chat_thread.current_completion
-            ? env.smart_contexts.get(
-                chat_thread.current_completion.data.context_key
-              )
-            : null,
-            opener_container: () => chat_thread.current_completion?.context_elm,
-        }
-      );
+      const ctx = chat_thread.current_completion
+        ? env.smart_contexts.get(
+            chat_thread.current_completion.data.context_key
+          )
+        : null
+      ;
+      if(ctx) {
+        env.config.modals.context_modal.open(ctx);
+      }
 
       return;
     }
@@ -276,13 +271,8 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
       /* 2. single, idempotent context update */
       const updated_ctx = await add_items_to_current_context(chat_thread, paths);
 
+      // add_items emits env event
 
-      const target_elm = chat_thread.current_completion?.context_elm;
-      if(target_elm) {
-        send_context_changed_event(target_elm, updated_ctx);
-      } else {
-        console.warn('[smart-chat-obsidian] No current completion context element found for context update');
-      }
     });
   }
 
