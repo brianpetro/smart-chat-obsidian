@@ -216,7 +216,7 @@ export async function post_process(chat_thread, thread_container, opts = {}) {
         : null
       ;
       if(ctx) {
-        env.config.modals.context_modal.open(ctx);
+        ctx.emit_event('context_selector:open');
       }
 
       return;
