@@ -1,10 +1,9 @@
 import thread_css from './thread.css' with { type: 'css' };
 import { get_initial_message } from '../utils/self_referential_keywords.js';
 import { Keymap } from 'obsidian';
-import { insert_text_in_chunks } from '../utils/insert_text_in_chunks.js';
-// import { insert_text_in_chunks } from '../utils/chunk_insert.js';
+import { insert_text_in_chunks } from 'smart-utils/insert_text_in_chunks.js';
 import { add_items_to_current_context } from '../utils/add_items_to_current_context.js';
-import { parse_dropped_data } from '../utils/parse_dropped_data.js';
+import { parse_dropped_data } from 'obsidian-smart-env/src/utils/parse_dropped_data.js';
 import { Menu } from 'obsidian';
 import { insert_variable_at_cursor, create_variable_menu } from './variable_utils.js';
 
