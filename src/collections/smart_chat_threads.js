@@ -10,13 +10,7 @@ import { get_language_options, get_initial_message } from "../utils/self_referen
  */
 export class SmartChatThreads extends Collection {
   get chat_model() {
-    const chat_model_opts = {
-      model_config: {},
-      settings: this.settings.chat_model,
-      reload_model: () => console.log('no reload_model needed'),
-      re_render_settings: this.open_settings?.bind(this),
-    };
-    return this.env.init_module('smart_chat_model', chat_model_opts);
+    return this.env.chat_completion_models?.default?.instance;
   }
 
   async open_settings() {
