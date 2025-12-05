@@ -1,6 +1,6 @@
 import chat_css from './chat.css' with { type: 'css' };
 import { ChatHistoryModal } from '../chat_history_modal.js';
-import { StoryModal } from 'obsidian-smart-env/modals/story.js';
+import { StoryModal } from 'obsidian-smart-env/src/modals/story.js';
 
 /**
  * @function build_html
